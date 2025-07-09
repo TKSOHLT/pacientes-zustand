@@ -27,34 +27,44 @@ const createPatient = (patient: DraftPatient): Patient => {
 
 //                       Aqui se coloca el type | Siempre tiene que ser con ({}) dentro de la función lambda (callback)
 export const usePatientStore = create<PatientState>()(
-  devtools((set) => ({
-    patients: [],
-    activeId: "",
-    addPatient: (data) => {
-      const newPatient = createPatient(data);
-      //Este es como tener un return {...state, ...} de un reducer
-      set((state) => ({
-        patients: [...state.patients, newPatient],
-      }));
-    },
-    deletePatient: (id) => {
-      set((state) => ({
-        patients: state.patients.filter((patient) => patient.id !== id),
-      }));
-    },
-    getPatientById: (id) => {
-      set(() => ({
-        activeId: id,
-      }));
-    },
-    updatePatient: (data) => {
+  devtools(
+    persist((set) => ({
+      patients: [],
+      activeId: "",
+      addPatient: (data) => {
+        const newPatient = createPatient(data);
+        //Este es como tener un return {...state, ...} de un reducer
         set((state) => ({
-            patients: state.patients.map(patient => patient.id === state.activeId ? {id: state.activeId, ...data} : patient),
-            activeId: ''
+          patients: [...state.patients, newPatient],
         }));
+      },
+      deletePatient: (id) => {
+        set((state) => ({
+          patients: state.patients.filter((patient) => patient.id !== id),
+        }));
+      },
+      getPatientById: (id) => {
+        set(() => ({
+          activeId: id,
+        }));
+      },
+      updatePatient: (data) => {
+        set((state) => ({
+          patients: state.patients.map((patient) =>
+            patient.id === state.activeId
+              ? { id: state.activeId, ...data }
+              : patient
+          ),
+          activeId: "",
+        }));
+      },
+    }),
+    {
+      name: "patient-storage", //De este modo se almacena en localstorage de manera automática
+      // storage: createJSONStorage(() => sessionStorage) // Se puede almacenar el storage en localstorage (default) o sessionStorage
     }
-  }))
-);
+  )
+));
 
 //Eto es todo o requerido para tener un store, con contextAPI es bastante más codigo, con un customHook, con muchas acciones en el
 //reducer y mucho código extra, con el codigo de este fichero se evita todo eso.
@@ -74,3 +84,11 @@ export const usePatientStore = create<PatientState>()(
 //     *** métodos...
 //   }));
 
+//!Además, se puede almacenar tambien en localstorage:
+
+// export const usePatientStore = create<PatientState>()(
+//   devtools(persist((set, get) => ({
+//   }), {
+//     name: 'nombre-para-el-storage'
+//   }))
+// );

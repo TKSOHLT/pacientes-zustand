@@ -1,4 +1,3 @@
-import React from "react";
 import type { Patient } from "../types";
 import PatientDetailItem from "./PatientDetailItem";
 import { usePatientStore } from "../store/store";
